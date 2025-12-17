@@ -1,0 +1,7 @@
+[daemon]
+interval_seconds = 5
+
+[ports.2]
+speed = 50
+effect = "spectrum"
+effect_speed = "fast"

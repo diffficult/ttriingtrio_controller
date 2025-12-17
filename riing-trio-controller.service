@@ -1,0 +1,20 @@
+[Unit]
+Description=Thermaltake Riing Trio Controller Daemon
+Documentation=https://github.com/yourusername/riing-trio-controller
+After=multi-user.target
+
+[Service]
+Type=simple
+User=root
+# Adjust these paths to match your installation
+ExecStart=/usr/local/bin/riing-trio-controller daemon --config /etc/riing-config.toml --interval 5
+Restart=always
+RestartSec=10
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=riing-trio
+
+[Install]
+WantedBy=multi-user.target

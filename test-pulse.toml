@@ -1,0 +1,5 @@
+[ports.2]
+speed = 50
+effect = "pulse"
+color = "purple"
+effect_speed = "slow"

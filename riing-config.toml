@@ -1,0 +1,101 @@
+# Riing Trio Controller Configuration - Effects Edition
+# This file defines persistent settings for your fans and LEDs
+# Used with: riing-trio-controller daemon
+
+# Daemon settings
+[daemon]
+# How often to reapply static colors (in seconds)
+# LEDs reset after ~7 seconds, so keep this at 5-6
+# Animated effects run at 30 FPS automatically
+interval_seconds = 5
+
+# Apply speed settings once at startup only (default: true)
+# Fan speeds PERSIST after being set (unlike LEDs which reset)
+speed_once_at_startup = true
+
+# ===== EXAMPLES =====
+
+# Example 1: Static color with brightness
+[ports.1]
+speed = 50
+effect = "static"
+color = "cyan"
+brightness = 0.8  # 80% brightness
+
+# Example 2: Spectrum/Rainbow effect
+[ports.2]
+speed = 75
+effect = "spectrum"
+effect_speed = "normal"  # extreme, fast, normal, slow
+
+# Example 3: Pulse/Breathing effect
+#[ports.3]
+#speed = 60
+#effect = "pulse"
+#color = "blue"
+#effect_speed = "slow"
+
+# Example 4: Wave effect
+#[ports.3]
+#effect = "wave"
+#color = "green"
+#effect_speed = "fast"
+
+# Example 5: Flow effect with custom colors
+#[ports.4]
+#effect = "flow"
+#flow_colors = "red, orange, yellow, green, blue, purple"
+#effect_speed = "normal"
+
+# Example 6: Ripple effect
+#[ports.5]
+#effect = "ripple"
+#color = "magenta"
+#effect_speed = "fast"
+
+# ===== AVAILABLE OPTIONS =====
+#
+# Effect Types:
+# - "static"    - Solid color (default if only color specified)
+# - "spectrum"  - Rainbow color cycle (all LEDs same color)
+# - "wave"      - Wave pattern traveling around ring
+# - "pulse"     - Breathing/pulsing effect
+# - "blink"     - On/off blinking
+# - "flow"      - Colors flowing around ring
+# - "ripple"    - Expanding waves from center
+#
+# Effect Speeds:
+# - "extreme"   - Very fast (1 second cycle)
+# - "fast"      - Fast (2 second cycle)
+# - "normal"    - Normal speed (4 second cycle)
+# - "slow"      - Slow (8 second cycle)
+#
+# Available Colors:
+# - "off" / "black"  - Off
+# - "white"          - White
+# - "red"            - Red
+# - "green"          - Green
+# - "blue"           - Blue
+# - "cyan"           - Cyan
+# - "magenta"        - Magenta
+# - "yellow"         - Yellow
+# - "orange"         - Orange
+# - "purple"         - Purple
+# - "pink"           - Pink
+# - "lime"           - Lime green
+# - "sky"            - Sky blue
+#
+# Brightness:
+# - 0.0 to 1.0 (0% to 100%)
+# - Default: 1.0 (100%)
+#
+# Fan Speed:
+# - 0 to 100 (percentage)
+# - Minimum RPM is ~500 (below 30% does nothing)
+#
+# LED Count:
+# - Default: 30 (Riing Trio fans)
+# - Only change if using different fans
+#
+# Advanced:
+# - reapply_speed = true   - Force speed reapplication (rarely needed)

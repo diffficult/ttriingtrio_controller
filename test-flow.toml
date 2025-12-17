@@ -1,0 +1,5 @@
+[ports.2]
+speed = 50
+effect = "flow"
+flow_colors = "red, orange, yellow, green, blue, purple"
+effect_speed = "normal"
