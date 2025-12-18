@@ -53,16 +53,67 @@ effect_speed = "normal"  # extreme, fast, normal, slow
 #color = "magenta"
 #effect_speed = "fast"
 
+# Example 7: Temperature-reactive (CPU monitoring with presets)
+#[ports.3]
+#speed = 60
+#
+#[ports.3.temp_reactive]
+#sensor = "CPU"  # Preset: CPU, GPU, NVME, HDD, SSD
+#transition_frames = 30  # Smooth 1-second fade between zones (0 = instant)
+#
+#[[ports.3.temp_reactive.zones]]
+#min_temp = 0.0
+#max_temp = 50.0
+#effect = "wave"
+#color = "cyan"
+#effect_speed = "normal"
+#
+#[[ports.3.temp_reactive.zones]]
+#min_temp = 50.0
+#max_temp = 70.0
+#effect = "pulse"
+#color = "yellow"
+#effect_speed = "fast"
+#
+#[[ports.3.temp_reactive.zones]]
+#min_temp = 70.0
+#max_temp = 999.0
+#effect = "pulse"
+#color = "red"
+#effect_speed = "extreme"
+
+# Example 8: Temperature-reactive (explicit sensor path)
+#[ports.4]
+#speed = 55
+#
+#[ports.4.temp_reactive]
+#sensor = "k10temp-pci-00c3:Tctl"  # Explicit path: adapter:field
+#transition_frames = 0  # Instant transition (no fade)
+#
+#[[ports.4.temp_reactive.zones]]
+#min_temp = 0.0
+#max_temp = 60.0
+#effect = "static"
+#color = "green"
+#
+#[[ports.4.temp_reactive.zones]]
+#min_temp = 60.0
+#max_temp = 999.0
+#effect = "blink"
+#color = "red"
+#effect_speed = "fast"
+
 # ===== AVAILABLE OPTIONS =====
 #
 # Effect Types:
-# - "static"    - Solid color (default if only color specified)
-# - "spectrum"  - Rainbow color cycle (all LEDs same color)
-# - "wave"      - Wave pattern traveling around ring
-# - "pulse"     - Breathing/pulsing effect
-# - "blink"     - On/off blinking
-# - "flow"      - Colors flowing around ring
-# - "ripple"    - Expanding waves from center
+# - "static"         - Solid color (default if only color specified)
+# - "spectrum"       - Rainbow color cycle (all LEDs same color)
+# - "wave"           - Wave pattern traveling around ring
+# - "pulse"          - Breathing/pulsing effect
+# - "blink"          - On/off blinking
+# - "flow"           - Colors flowing around ring
+# - "ripple"         - Expanding waves from center
+# - "temp_reactive"  - Change effects based on temperature (see examples above)
 #
 # Effect Speeds:
 # - "extreme"   - Very fast (1 second cycle)
@@ -99,3 +150,18 @@ effect_speed = "normal"  # extreme, fast, normal, slow
 #
 # Advanced:
 # - reapply_speed = true   - Force speed reapplication (rarely needed)
+#
+# Temperature-Reactive Options:
+# - sensor: Temperature sensor to monitor
+#   - Presets: "CPU", "GPU", "NVME", "HDD", "SSD" (auto-detects common sensors)
+#   - Explicit: "adapter:field" or "adapter.field" (e.g., "k10temp-pci-00c3:Tctl")
+#   - Use 'sensors' command to see available sensors
+# - transition_frames: Smoothness of color transitions between zones
+#   - 0 = instant switch
+#   - 30 = 1 second fade (at 30 FPS)
+#   - 60 = 2 second fade
+# - zones: Array of temperature ranges with effects
+#   - Must be contiguous (zone1.max_temp == zone2.min_temp)
+#   - If temp is outside all zones, clamps to nearest zone
+#   - Each zone supports all normal effect types and options
+# - Fallback behavior: If sensor read fails, LEDs blink magenta then turn off
