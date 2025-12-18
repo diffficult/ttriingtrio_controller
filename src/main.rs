@@ -191,10 +191,19 @@ enum SensorSpec {
 
 impl SensorSpec {
     fn from_str(s: &str) -> SensorSpec {
-        // Simple detection: if contains ':' or '-', it's explicit path
-        if s.contains(':') || s.contains('-') {
+        // Check if it's a known preset first
+        let preset_upper = s.to_uppercase();
+        let known_presets = ["CPU", "GPU", "GPU-NVIDIA", "NVME", "HDD", "SSD"];
+
+        if known_presets.iter().any(|p| preset_upper == *p) {
+            SensorSpec::Preset(s.to_string())
+        }
+        // Otherwise, if it contains ':' it's likely an explicit path (adapter:field)
+        else if s.contains(':') {
             SensorSpec::Explicit(s.to_string())
-        } else {
+        }
+        // Default to preset for simple names
+        else {
             SensorSpec::Preset(s.to_string())
         }
     }
@@ -802,6 +811,11 @@ fn read_sensor_temp(sensor_spec: &SensorSpec) -> Result<f32> {
 
 /// Find temperature from preset (e.g., "CPU")
 fn find_preset_sensor(sensors_output: &str, preset: &str) -> Result<f32> {
+    // Special case: NVIDIA GPU uses nvidia-smi instead of lm_sensors
+    if preset.to_lowercase() == "gpu-nvidia" {
+        return read_nvidia_gpu_temp();
+    }
+
     let patterns = match preset.to_lowercase().as_str() {
         "cpu" => vec!["Tctl:", "Package id 0:", "CPU Temperature:", "coretemp"],
         "gpu" => vec!["edge:", "GPU:", "amdgpu", "nvidia"],
@@ -886,6 +900,41 @@ fn parse_temp_from_line(line: &str) -> Option<f32> {
     re.captures(line)
         .and_then(|cap| cap.get(1))
         .and_then(|m| m.as_str().parse::<f32>().ok())
+}
+
+/// Read NVIDIA GPU temperature using nvidia-smi
+fn read_nvidia_gpu_temp() -> Result<f32> {
+    use std::process::Command;
+
+    let output = Command::new("nvidia-smi")
+        .args(&["-q", "-d", "TEMPERATURE"])
+        .output()
+        .context("Failed to execute 'nvidia-smi' command. Is NVIDIA driver installed?")?;
+
+    if !output.status.success() {
+        return Err(anyhow!("nvidia-smi command failed"));
+    }
+
+    let text = String::from_utf8_lossy(&output.stdout);
+
+    // Look for "GPU Current Temp" line
+    for line in text.lines() {
+        if line.contains("GPU Current Temp") {
+            // Parse line like: "        GPU Current Temp                  : 52 C"
+            if let Some(temp_str) = line.split(':').nth(1) {
+                // Extract number before "C"
+                if let Some(num_str) = temp_str.trim().split_whitespace().next() {
+                    if let Ok(temp) = num_str.parse::<f32>() {
+                        return Ok(temp);
+                    }
+                }
+            }
+        }
+    }
+
+    Err(anyhow!(
+        "Could not find 'GPU Current Temp' in nvidia-smi output"
+    ))
 }
 
 /// Riing Trio Controller

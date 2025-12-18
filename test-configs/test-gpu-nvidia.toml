@@ -1,0 +1,31 @@
+[daemon]
+interval_seconds = 5
+speed_once_at_startup = true
+
+# NVIDIA GPU temperature monitoring
+[ports.1]
+speed = 70
+
+[ports.1.temp_reactive]
+sensor = "GPU-NVIDIA"  # Uses nvidia-smi
+transition_frames = 30  # 1 second smooth fade
+
+[[ports.1.temp_reactive.zones]]
+min_temp = 0.0
+max_temp = 60.0
+effect = "static"
+color = "green"
+
+[[ports.1.temp_reactive.zones]]
+min_temp = 60.0
+max_temp = 75.0
+effect = "wave"
+color = "yellow"
+effect_speed = "normal"
+
+[[ports.1.temp_reactive.zones]]
+min_temp = 75.0
+max_temp = 999.0
+effect = "pulse"
+color = "red"
+effect_speed = "extreme"

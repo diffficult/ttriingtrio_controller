@@ -1,0 +1,25 @@
+# Fan Speed Only Configuration
+# Sets fan speeds to 60% on ports 1, 2, and 3 with LEDs off
+# Use case: Silent operation, turn off RGB lighting
+
+[daemon]
+interval_seconds = 5
+speed_once_at_startup = true
+
+# Port 1: 60% speed, LEDs off
+[ports.1]
+speed = 60
+effect = "static"
+color = "off"
+
+# Port 2: 60% speed, LEDs off
+[ports.2]
+speed = 60
+effect = "static"
+color = "off"
+
+# Port 3: 60% speed, LEDs off
+[ports.3]
+speed = 60
+effect = "static"
+color = "off"
