@@ -2,9 +2,8 @@
 interval_seconds = 5
 speed_once_at_startup = true
 
-# Temperature-reactive port monitoring CPU
+# Temperature-reactive port monitoring CPU with reactive fan speeds
 [ports.2]
-speed = 50
 
 [ports.2.temp_reactive]
 sensor = "CPU"  # Preset for CPU temperature
@@ -16,6 +15,7 @@ max_temp = 40.0
 effect = "wave"
 color = "cyan"
 effect_speed = "normal"
+speed = 30  # Cool and quiet when idle
 
 [[ports.2.temp_reactive.zones]]
 min_temp = 40.0
@@ -23,6 +23,7 @@ max_temp = 70.0
 effect = "pulse"
 color = "yellow"
 effect_speed = "fast"
+speed = 60  # Moderate speed under load
 
 [[ports.2.temp_reactive.zones]]
 min_temp = 70.0
@@ -30,3 +31,4 @@ max_temp = 999.0
 effect = "pulse"
 color = "red"
 effect_speed = "extreme"
+speed = 100  # Max cooling when hot

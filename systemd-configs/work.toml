@@ -1,0 +1,112 @@
+# Work Config: 10AM - 3:30PM
+# All LEDs OFF, temperature-reactive fan speeds
+# Port 1: CPU temp monitoring, Port 2-3: GPU temp monitoring
+
+[daemon]
+interval_seconds = 5
+speed_once_at_startup = true
+
+# Port 1: Top of case (CPU temperature-reactive)
+[ports.1]
+
+[ports.1.temp_reactive]
+sensor = "CPU"
+transition_frames = 0  # Instant speed changes
+
+[[ports.1.temp_reactive.zones]]
+min_temp = 0.0
+max_temp = 40.0
+effect = "static"
+color = "off"
+speed = 40
+
+[[ports.1.temp_reactive.zones]]
+min_temp = 40.0
+max_temp = 55.0
+effect = "static"
+color = "off"
+speed = 60
+
+[[ports.1.temp_reactive.zones]]
+min_temp = 55.0
+max_temp = 75.0
+effect = "static"
+color = "off"
+speed = 80
+
+[[ports.1.temp_reactive.zones]]
+min_temp = 75.0
+max_temp = 999.0
+effect = "static"
+color = "off"
+speed = 100
+
+# Port 2: Front of case (GPU temperature-reactive)
+[ports.2]
+
+[ports.2.temp_reactive]
+sensor = "GPU-NVIDIA"
+transition_frames = 0  # Instant speed changes
+
+[[ports.2.temp_reactive.zones]]
+min_temp = 0.0
+max_temp = 40.0
+effect = "static"
+color = "off"
+speed = 40
+
+[[ports.2.temp_reactive.zones]]
+min_temp = 40.0
+max_temp = 55.0
+effect = "static"
+color = "off"
+speed = 60
+
+[[ports.2.temp_reactive.zones]]
+min_temp = 55.0
+max_temp = 75.0
+effect = "static"
+color = "off"
+speed = 80
+
+[[ports.2.temp_reactive.zones]]
+min_temp = 75.0
+max_temp = 999.0
+effect = "static"
+color = "off"
+speed = 100
+
+# Port 3: Front of case (GPU temperature-reactive)
+[ports.3]
+
+[ports.3.temp_reactive]
+sensor = "GPU-NVIDIA"
+transition_frames = 0  # Instant speed changes
+
+[[ports.3.temp_reactive.zones]]
+min_temp = 0.0
+max_temp = 40.0
+effect = "static"
+color = "off"
+speed = 40
+
+[[ports.3.temp_reactive.zones]]
+min_temp = 40.0
+max_temp = 55.0
+effect = "static"
+color = "off"
+speed = 60
+
+[[ports.3.temp_reactive.zones]]
+min_temp = 55.0
+max_temp = 75.0
+effect = "static"
+color = "off"
+speed = 80
+
+[[ports.3.temp_reactive.zones]]
+min_temp = 75.0
+max_temp = 999.0
+effect = "static"
+color = "off"
+speed = 100

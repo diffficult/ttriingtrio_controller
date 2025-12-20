@@ -1,0 +1,7 @@
+[Unit]
+Description=Switch Riing Trio to Evening Config
+After=riing-trio-controller.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c 'ln -sf /etc/riing-trio/evening.toml /etc/riing-trio/active.toml && systemctl restart riing-trio-controller.service'

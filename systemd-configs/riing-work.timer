@@ -1,0 +1,9 @@
+[Unit]
+Description=Switch to Work Config at 10AM
+
+[Timer]
+OnCalendar=*-*-* 10:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

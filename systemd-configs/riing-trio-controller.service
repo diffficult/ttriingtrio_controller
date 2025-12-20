@@ -1,0 +1,12 @@
+[Unit]
+Description=Riing Trio RGB Controller Daemon
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/riing-trio-controller daemon --config /etc/riing-trio/active.toml
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

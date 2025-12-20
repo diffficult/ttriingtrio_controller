@@ -1,0 +1,25 @@
+# Sleep Config: 3AM - 10AM
+# All LEDs OFF, fixed 50% fan speed
+# No temperature monitoring (save resources during sleep hours)
+
+[daemon]
+interval_seconds = 5
+speed_once_at_startup = true
+
+# Port 1: Top of case (CPU)
+[ports.1]
+speed = 50
+effect = "static"
+color = "off"
+
+# Port 2: Front of case (GPU)
+[ports.2]
+speed = 50
+effect = "static"
+color = "off"
+
+# Port 3: Front of case (GPU)
+[ports.3]
+speed = 50
+effect = "static"
+color = "off"

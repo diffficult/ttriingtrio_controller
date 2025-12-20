@@ -55,7 +55,6 @@ effect_speed = "normal"  # extreme, fast, normal, slow
 
 # Example 7: Temperature-reactive (CPU monitoring with presets)
 #[ports.3]
-#speed = 60
 #
 #[ports.3.temp_reactive]
 #sensor = "CPU"  # Preset: CPU, GPU, NVME, HDD, SSD
@@ -67,6 +66,7 @@ effect_speed = "normal"  # extreme, fast, normal, slow
 #effect = "wave"
 #color = "cyan"
 #effect_speed = "normal"
+#speed = 30  # Optional: fan speed for this temp zone
 #
 #[[ports.3.temp_reactive.zones]]
 #min_temp = 50.0
@@ -74,6 +74,7 @@ effect_speed = "normal"  # extreme, fast, normal, slow
 #effect = "pulse"
 #color = "yellow"
 #effect_speed = "fast"
+#speed = 60  # Optional: increase fan speed in warm zone
 #
 #[[ports.3.temp_reactive.zones]]
 #min_temp = 70.0
@@ -81,6 +82,7 @@ effect_speed = "normal"  # extreme, fast, normal, slow
 #effect = "pulse"
 #color = "red"
 #effect_speed = "extreme"
+#speed = 100  # Optional: max speed in hot zone
 
 # Example 8: Temperature-reactive (explicit sensor path)
 #[ports.4]
@@ -103,9 +105,8 @@ effect_speed = "normal"  # extreme, fast, normal, slow
 #color = "red"
 #effect_speed = "fast"
 
-# Example 9: Temperature-reactive (NVIDIA GPU)
+# Example 9: Temperature-reactive (NVIDIA GPU with reactive fan speed)
 #[ports.5]
-#speed = 70
 #
 #[ports.5.temp_reactive]
 #sensor = "GPU-NVIDIA"  # Uses nvidia-smi for NVIDIA GPUs
@@ -116,6 +117,7 @@ effect_speed = "normal"  # extreme, fast, normal, slow
 #max_temp = 60.0
 #effect = "static"
 #color = "green"
+#speed = 30  # Cool and quiet when GPU is idle
 #
 #[[ports.5.temp_reactive.zones]]
 #min_temp = 60.0
@@ -123,6 +125,7 @@ effect_speed = "normal"  # extreme, fast, normal, slow
 #effect = "wave"
 #color = "yellow"
 #effect_speed = "normal"
+#speed = 65  # Ramp up when gaming
 #
 #[[ports.5.temp_reactive.zones]]
 #min_temp = 75.0
@@ -130,6 +133,7 @@ effect_speed = "normal"  # extreme, fast, normal, slow
 #effect = "pulse"
 #color = "red"
 #effect_speed = "extreme"
+#speed = 100  # Full blast when hot
 
 # ===== AVAILABLE OPTIONS =====
 #
@@ -194,4 +198,7 @@ effect_speed = "normal"  # extreme, fast, normal, slow
 #   - Must be contiguous (zone1.max_temp == zone2.min_temp)
 #   - If temp is outside all zones, clamps to nearest zone
 #   - Each zone supports all normal effect types and options
+#   - Optional 'speed' per zone: Fan speed changes when entering zone (0-100%)
+#     * Speed persists, so only applied once when zone changes
+#     * Allows temp-reactive fan curves (e.g., 30% cool, 60% warm, 100% hot)
 # - Fallback behavior: If sensor read fails, LEDs blink magenta then turn off

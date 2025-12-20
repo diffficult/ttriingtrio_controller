@@ -215,6 +215,7 @@ struct TempZone {
     min_temp: f32,
     max_temp: f32,
     effect: Effect,
+    speed: Option<u8>, // Optional fan speed for this zone (0-100)
 }
 
 impl TempZone {
@@ -269,6 +270,9 @@ struct TempZoneToml {
 
     #[serde(default)]
     flow_colors: Option<String>,
+
+    #[serde(default)]
+    speed: Option<u8>, // Optional fan speed for this zone (0-100)
 }
 
 /// Parse effect from port configuration
@@ -378,10 +382,18 @@ fn parse_temp_reactive(toml_config: &TempReactiveToml) -> Result<TempReactiveCon
         // Parse effect for this zone
         let effect = parse_zone_effect(zone_toml)?;
 
+        // Validate speed if provided
+        if let Some(speed) = zone_toml.speed {
+            if speed > 100 {
+                return Err(anyhow!("Zone {}: speed must be 0-100, got {}", idx, speed));
+            }
+        }
+
         zones.push(TempZone {
             min_temp: zone_toml.min_temp,
             max_temp: zone_toml.max_temp,
             effect,
+            speed: zone_toml.speed,
         });
     }
 
@@ -704,11 +716,6 @@ impl Color {
         b: 235,
     };
 
-    /// Create custom color from RGB values
-    fn from_rgb(r: u8, g: u8, b: u8) -> Color {
-        Color { r, g, b }
-    }
-
     /// Convert to GRB byte order (as required by Riing Trio protocol)
     fn to_grb_bytes(&self) -> [u8; 3] {
         [self.g, self.r, self.b]
@@ -907,7 +914,10 @@ fn read_nvidia_gpu_temp() -> Result<f32> {
     use std::process::Command;
 
     let output = Command::new("nvidia-smi")
-        .args(&["-q", "-d", "TEMPERATURE"])
+        .args(&[
+            "--query-gpu=temperature.gpu",
+            "--format=csv,noheader,nounits",
+        ])
         .output()
         .context("Failed to execute 'nvidia-smi' command. Is NVIDIA driver installed?")?;
 
@@ -916,25 +926,11 @@ fn read_nvidia_gpu_temp() -> Result<f32> {
     }
 
     let text = String::from_utf8_lossy(&output.stdout);
+    let temp_str = text.trim();
 
-    // Look for "GPU Current Temp" line
-    for line in text.lines() {
-        if line.contains("GPU Current Temp") {
-            // Parse line like: "        GPU Current Temp                  : 52 C"
-            if let Some(temp_str) = line.split(':').nth(1) {
-                // Extract number before "C"
-                if let Some(num_str) = temp_str.trim().split_whitespace().next() {
-                    if let Ok(temp) = num_str.parse::<f32>() {
-                        return Ok(temp);
-                    }
-                }
-            }
-        }
-    }
-
-    Err(anyhow!(
-        "Could not find 'GPU Current Temp' in nvidia-smi output"
-    ))
+    temp_str
+        .parse::<f32>()
+        .with_context(|| format!("Failed to parse nvidia-smi output: '{}'", temp_str))
 }
 
 /// Riing Trio Controller
@@ -1544,6 +1540,23 @@ fn run_daemon(vid: u16, pid: u16, config_path: PathBuf, interval: u64) -> Result
                                 state.transition_from_colors = Some(old_colors);
                                 state.transition_start_frame = Some(frame);
                             }
+
+                            // Apply fan speed if this zone has one
+                            let new_zone = &config_ref.zones[new_zone_idx];
+                            if let Some(zone_speed) = new_zone.speed {
+                                if let Err(e) = controller.set_speed(*port, zone_speed) {
+                                    eprintln!(
+                                        "  Port {}: Failed to set speed to {}% for temp zone: {}",
+                                        port, zone_speed, e
+                                    );
+                                } else {
+                                    println!(
+                                        "  Port {}: Zone changed to {:.1}°C, speed set to {}%",
+                                        port, temp, zone_speed
+                                    );
+                                }
+                            }
+
                             state.current_zone_idx = new_zone_idx;
                         }
                     }

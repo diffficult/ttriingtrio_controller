@@ -1,0 +1,9 @@
+[Unit]
+Description=Switch to Evening Config at 3:30PM
+
+[Timer]
+OnCalendar=*-*-* 15:30:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

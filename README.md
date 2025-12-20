@@ -1,6 +1,15 @@
 # Riing Trio RGB Controller
 
-A comprehensive Linux CLI tool to control Thermaltake Riing Trio RGB fans via HID USB. Supports **full LED effects**, **custom colors**, **brightness control**, **fan speed control**, and **persistent settings via daemon mode**.
+A comprehensive Linux CLI tool to control Thermaltake Riing Trio RGB fans via HID USB. Supports **full LED effects**, **custom colors**, **brightness control**, **fan speed control**, **temperature-reactive effects**, **automatic fan curves**, and **time-based scheduling**.
+
+## Quick Links
+
+- 🎨 **[Effects Guide](EFFECTS_GUIDE.md)** - Complete effects reference with examples
+- 🔧 **[Daemon Mode](DAEMON_MODE.md)** - How to run as persistent background service
+- ⏰ **[Time-Based Scheduling](systemd-configs/INSTALL.md)** - Automatic config rotation throughout the day
+- 🌡️ **[Temperature Monitoring](#temperature-reactive-effects-new)** - CPU/GPU reactive effects and fan speeds
+- 📚 **[Protocol Documentation](PROTOCOL.md)** - HID protocol details
+- 🧪 **[Testing Guide](TESTING.md)** - Testing procedures
 
 ## Features
 
@@ -18,11 +27,19 @@ A comprehensive Linux CLI tool to control Thermaltake Riing Trio RGB fans via HI
 - ✅ **Brightness control**: 0-100% adjustable intensity
 - ✅ **Effect speeds**: Extreme, Fast, Normal, Slow
 
+### 🌡️ Temperature Monitoring (NEW!)
+- ✅ **Temperature-reactive effects**: Change LED colors based on CPU/GPU temperature
+- ✅ **Temperature-reactive fan speeds**: Automatic fan curves based on temperature zones
+- ✅ **Multiple sensor support**: CPU, GPU (NVIDIA/AMD), NVMe, HDD/SSD
+- ✅ **Smooth transitions**: Configurable fade between temperature zones
+- ✅ **Per-zone configuration**: Different effects, colors, and fan speeds for each temp range
+
 ### ⚙️ System Features
 - ✅ **Fan Speed Control**: 0-100% (minimum ~500 RPM)
 - ✅ **Status Monitoring**: Read current RPM and speed
 - ✅ **Daemon Mode**: Continuously apply settings to prevent controller reset
-- ✅ **Systemd Integration**: Run as a system service
+- ✅ **Systemd Integration**: Run as a system service with time-based scheduling
+- ✅ **Time-based config rotation**: Automatically switch configs throughout the day
 - ✅ **Direct HID USB communication** (no kernel drivers needed)
 - ✅ **Per-port control** (ports 1-5)
 - ✅ **Configurable LED count**
@@ -221,6 +238,119 @@ brightness = 0.5  # 50% brightness
 ```
 
 See **[EFFECTS_GUIDE.md](EFFECTS_GUIDE.md)** for complete effects documentation!
+
+### Temperature-Reactive Effects (NEW!)
+
+Monitor CPU/GPU temperatures and automatically change LED effects and fan speeds based on temperature zones.
+
+**Example: CPU Temperature Monitoring**
+```toml
+[daemon]
+interval_seconds = 5
+
+[ports.1]
+
+[ports.1.temp_reactive]
+sensor = "CPU"  # Auto-detect CPU temperature
+transition_frames = 30  # Smooth 1-second color transitions
+
+[[ports.1.temp_reactive.zones]]
+min_temp = 0.0
+max_temp = 50.0
+effect = "wave"
+color = "cyan"
+speed = 40  # Quiet when cool
+
+[[ports.1.temp_reactive.zones]]
+min_temp = 50.0
+max_temp = 70.0
+effect = "pulse"
+color = "yellow"
+speed = 60  # Ramp up when warm
+
+[[ports.1.temp_reactive.zones]]
+min_temp = 70.0
+max_temp = 999.0
+effect = "pulse"
+color = "red"
+effect_speed = "extreme"
+speed = 100  # Max cooling when hot
+```
+
+**Example: NVIDIA GPU Monitoring**
+```toml
+[ports.2.temp_reactive]
+sensor = "GPU-NVIDIA"  # Uses nvidia-smi for best reliability
+transition_frames = 30
+
+[[ports.2.temp_reactive.zones]]
+min_temp = 0.0
+max_temp = 60.0
+effect = "static"
+color = "green"
+speed = 30
+
+[[ports.2.temp_reactive.zones]]
+min_temp = 60.0
+max_temp = 75.0
+effect = "wave"
+color = "yellow"
+speed = 70
+
+[[ports.2.temp_reactive.zones]]
+min_temp = 75.0
+max_temp = 999.0
+effect = "pulse"
+color = "red"
+speed = 100
+```
+
+**Available Sensors:**
+- `CPU` - Auto-detect CPU temperature (lm_sensors)
+- `GPU-NVIDIA` - NVIDIA GPU via nvidia-smi (most reliable for NVIDIA)
+- `GPU` - AMD GPU via lm_sensors
+- `NVME` - NVMe SSD temperature
+- `HDD` / `SSD` - Hard drive temperature
+- `adapter:field` - Explicit sensor path (e.g., `k10temp-pci-00c3:Tctl`)
+
+**Features:**
+- ✅ Each zone can have different effects, colors, and fan speeds
+- ✅ Smooth color transitions between zones (configurable fade time)
+- ✅ Fan speeds change automatically when entering new zone
+- ✅ Fallback mode if sensor fails (blink magenta then turn off)
+- ✅ Sensor read every 5 seconds (non-blocking, efficient)
+
+### Time-Based Configuration Scheduling (NEW!)
+
+Automatically rotate between different configs throughout the day using systemd timers.
+
+**Pre-configured Schedule:**
+- **3:00 AM - 10:00 AM**: Sleep mode (LEDs OFF, 50% fixed fan speed)
+- **10:00 AM - 3:30 PM**: Work mode (LEDs OFF, temp-reactive fan speeds)
+- **3:30 PM - 8:00 PM**: Evening mode (WAVE effects, temp-reactive colors & speeds)
+- **8:00 PM - 3:00 AM**: Night mode (LEDs OFF, temp-reactive fan speeds)
+
+**Quick Setup:**
+```bash
+# Install configs and systemd files
+sudo mkdir -p /etc/riing-trio
+sudo cp systemd-configs/*.toml /etc/riing-trio/
+sudo cp systemd-configs/*.service /etc/systemd/system/
+sudo cp systemd-configs/*.timer /etc/systemd/system/
+
+# Set initial config
+sudo ln -sf /etc/riing-trio/work.toml /etc/riing-trio/active.toml
+
+# Enable and start
+sudo systemctl daemon-reload
+sudo systemctl enable --now riing-trio-controller.service
+sudo systemctl enable --now riing-sleep.timer
+sudo systemctl enable --now riing-work.timer
+sudo systemctl enable --now riing-evening.timer
+sudo systemctl enable --now riing-night.timer
+```
+
+**See [systemd-configs/INSTALL.md](systemd-configs/INSTALL.md) for complete time-based scheduling guide!**
 
 ### Advanced Options
 
@@ -440,11 +570,12 @@ done
 - ~~No fan speed~~ ✅ **0-100% speed control**
 - ~~No persistence~~ ✅ **Daemon mode with config files**
 - ~~No status reading~~ ✅ **RPM and speed monitoring**
+- ~~No temperature monitoring~~ ✅ **CPU/GPU temperature-reactive effects & fan speeds**
+- ~~No scheduling~~ ✅ **Time-based config rotation with systemd timers**
 
 ### Future Enhancements
 - Additional effects (fire, sparkle, lightning)
 - Music-reactive effects
-- Temperature-based fan curves
 - Per-LED custom patterns
 - Web interface for live preview
 - Windows/macOS support

@@ -2,9 +2,8 @@
 interval_seconds = 5
 speed_once_at_startup = true
 
-# NVIDIA GPU temperature monitoring
+# NVIDIA GPU temperature monitoring with reactive fan speeds
 [ports.1]
-speed = 70
 
 [ports.1.temp_reactive]
 sensor = "GPU-NVIDIA"  # Uses nvidia-smi
@@ -15,6 +14,7 @@ min_temp = 0.0
 max_temp = 60.0
 effect = "static"
 color = "green"
+speed = 30  # Quiet when idle/light gaming
 
 [[ports.1.temp_reactive.zones]]
 min_temp = 60.0
@@ -22,6 +22,7 @@ max_temp = 75.0
 effect = "wave"
 color = "yellow"
 effect_speed = "normal"
+speed = 70  # Ramp up under heavy load
 
 [[ports.1.temp_reactive.zones]]
 min_temp = 75.0
@@ -29,3 +30,4 @@ max_temp = 999.0
 effect = "pulse"
 color = "red"
 effect_speed = "extreme"
+speed = 100  # Full blast when GPU is stressed
